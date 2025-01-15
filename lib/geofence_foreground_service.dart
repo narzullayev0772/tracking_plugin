@@ -8,8 +8,7 @@ class GeofenceForegroundService {
 
   GeofenceForegroundService._internal();
 
-  static final GeofenceForegroundService _instance =
-      GeofenceForegroundService._internal();
+  static final GeofenceForegroundService _instance = GeofenceForegroundService._internal();
 
   /// Starts the geofencing service
   /// This method initiates a geofencing service that monitors the provided geographic areas by [addGeofenceZone].
@@ -62,8 +61,7 @@ class GeofenceForegroundService {
   /// Parameters: None.
   /// Returns: A Future<bool> that resolves to true if the service is running; otherwise, false.
   Future<bool> isForegroundServiceRunning() {
-    return GeofenceForegroundServicePlatform.instance
-        .isForegroundServiceRunning();
+    return GeofenceForegroundServicePlatform.instance.isForegroundServiceRunning();
   }
 
   /// Adds a geofence zone for monitoring
@@ -100,5 +98,12 @@ class GeofenceForegroundService {
   /// Returns: A Future<bool> that resolves to true if all zones were removed successfully; otherwise, false.
   Future<bool> removeAllGeoFences() {
     return GeofenceForegroundServicePlatform.instance.removeAllGeoFences();
+  }
+
+  /// Subscribes to location updates
+  /// This method is used to subscribe to location updates.
+  /// Returns: A Future<bool> that resolves to true if the subscription was successful; otherwise, false.
+  Future<void> subscribeToLocationUpdates() async {
+    GeofenceForegroundServicePlatform.instance.subscribeToLocationUpdates();
   }
 }

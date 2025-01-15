@@ -13,16 +13,13 @@ import 'models/background_task_handlers.dart';
 import 'models/notification_icon_data.dart';
 
 /// An implementation of [GeofenceForegroundServicePlatform] that uses method channels.
-class MethodChannelGeofenceForegroundService
-    extends GeofenceForegroundServicePlatform {
+class MethodChannelGeofenceForegroundService extends GeofenceForegroundServicePlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
-  final foregroundChannel = const MethodChannel(
-      'ps.byshy.geofence/foreground_geofence_foreground_service');
+  final foregroundChannel = const MethodChannel('ps.byshy.geofence/foreground_geofence_foreground_service');
 
   @visibleForTesting
-  final backgroundChannel = const MethodChannel(
-      "ps.byshy.geofence/background_geofence_foreground_service");
+  final backgroundChannel = const MethodChannel("ps.byshy.geofence/background_geofence_foreground_service");
 
   /// This method is used to start the geofencing foreground service
   @override
@@ -91,9 +88,7 @@ class MethodChannelGeofenceForegroundService
 
       return backgroundTriggerHandler(
         call.arguments['ps.byshy.geofence.ZONE_ID'],
-        inputData == null
-            ? GeofenceEventType.unKnown
-            : (jsonDecode(inputData) as int).toGeofenceEventType(),
+        inputData == null ? GeofenceEventType.unKnown : (jsonDecode(inputData) as int).toGeofenceEventType(),
       );
     });
 
@@ -106,9 +101,7 @@ class MethodChannelGeofenceForegroundService
     bool didStop = false;
 
     try {
-      didStop = await foregroundChannel
-              .invokeMethod<bool?>('stopGeofencingService') ??
-          false;
+      didStop = await foregroundChannel.invokeMethod<bool?>('stopGeofencingService') ?? false;
     } catch (e) {
       log(
         e.toString(),
@@ -125,9 +118,7 @@ class MethodChannelGeofenceForegroundService
     bool isServiceRunning = false;
 
     try {
-      isServiceRunning = await foregroundChannel
-              .invokeMethod<bool?>('isForegroundServiceRunning') ??
-          false;
+      isServiceRunning = await foregroundChannel.invokeMethod<bool?>('isForegroundServiceRunning') ?? false;
     } catch (e) {
       log(
         e.toString(),
@@ -192,9 +183,7 @@ class MethodChannelGeofenceForegroundService
     bool areAllAreasRemoved = false;
 
     try {
-      areAllAreasRemoved =
-          await foregroundChannel.invokeMethod<bool?>('removeAllGeoFences') ??
-              false;
+      areAllAreasRemoved = await foregroundChannel.invokeMethod<bool?>('removeAllGeoFences') ?? false;
     } catch (e) {
       log(
         e.toString(),
@@ -203,5 +192,12 @@ class MethodChannelGeofenceForegroundService
     }
 
     return areAllAreasRemoved;
+  }
+
+  @override
+  Future<void> subscribeToLocationUpdates() async {
+    foregroundChannel.setMethodCallHandler((call) async {
+      log("Location updates: ${call.arguments} ${call.method}");
+    });
   }
 }

@@ -4,7 +4,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-import android.os.Build
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
@@ -26,6 +25,8 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
 import java.util.concurrent.TimeUnit
 
 private fun Context.workManager() = WorkManager.getInstance(this)
@@ -34,9 +35,16 @@ class GeofenceForegroundService : Service() {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
+    private lateinit var channel: MethodChannel
 
     override fun onCreate() {
         super.onCreate()
+
+        val engine = FlutterEngine(applicationContext)
+        channel = MethodChannel(
+            engine.dartExecutor.binaryMessenger,
+            "ps.byshy.geofence/foreground_geofence_foreground_service"
+        )
 
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(this)
@@ -54,6 +62,22 @@ class GeofenceForegroundService : Service() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
+                val oneOffTaskRequest =
+                    OneTimeWorkRequest.Builder(BackgroundWorker::class.java)
+                        .setInputData(
+                            buildTaskInputData(
+                                "l:${locationResult.lastLocation?.latitude}, ${locationResult.lastLocation?.longitude}",
+                                false,
+                                "3"
+                            )
+                        )
+                        .build()
+
+                applicationContext!!.workManager().enqueueUniqueWork(
+                    Constants.bgTaskUniqueNameLocation,
+                    ExistingWorkPolicy.APPEND_OR_REPLACE,
+                    oneOffTaskRequest
+                )
 
                 Log.d(
                     "onLocationResult",
@@ -142,11 +166,13 @@ class GeofenceForegroundService : Service() {
                 if (zoneID != null) {
                     val oneOffTaskRequest =
                         OneTimeWorkRequest.Builder(BackgroundWorker::class.java)
-                            .setInputData(buildTaskInputData(
-                                zoneID,
-                                isInDebugMode,
-                                geofenceTransition.toString()
-                            ))
+                            .setInputData(
+                                buildTaskInputData(
+                                    zoneID,
+                                    isInDebugMode,
+                                    geofenceTransition.toString()
+                                )
+                            )
                             .build()
 
                     this.baseContext!!.workManager().enqueueUniqueWork(

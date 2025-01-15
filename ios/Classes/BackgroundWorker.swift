@@ -38,11 +38,16 @@ class BackgroundWorker {
 
         let debugHelper = DebugNotificationHelper(taskSessionIdentifier)
 
-        debugHelper.showStartFetchNotification(
+        let isDwell = triggerType != 3
+
+        if isDwell {
+            debugHelper.showStartFetchNotification(
             startDate: taskSessionStart,
             callBackHandle: callbackHandle,
             callbackInfo: flutterCallbackInformation
-        )
+            )
+        }
+
 
         var flutterEngine: FlutterEngine? = FlutterEngine(
             name: "\(GeofenceForegroundServicePlugin.identifier).BackgroundFetch",
@@ -78,6 +83,8 @@ class BackgroundWorker {
                     "ps.byshy.geofence.INPUT_DATA": "\(self.triggerType)"
                 ]
 
+                let isDwell = self.triggerType != 3
+
                 backgroundMethodChannel?.invokeMethod(
                     BackgroundChannel.onResultSendCommand,
                     arguments: arguments,
@@ -88,11 +95,13 @@ class BackgroundWorker {
                         let taskDuration = taskSessionCompleter.timeIntervalSince(taskSessionStart)
 //                        logInfo("[\(String(describing: self))] \(#function) -> performBackgroundRequest.\(result) (finished in \(taskDuration.formatToSeconds()))")
 
-                        debugHelper.showCompletedFetchNotification(
-                            completedDate: taskSessionCompleter,
-                            result: result,
-                            elapsedTime: taskDuration
-                        )
+                        if isDwell {
+                            debugHelper.showCompletedFetchNotification(
+                                completedDate: taskSessionCompleter,
+                                result: result,
+                                elapsedTime: taskDuration
+                            )
+                        }
                         completionHandler(result)
                     })
             default:

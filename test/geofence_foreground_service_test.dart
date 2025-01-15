@@ -54,6 +54,12 @@ class MockGeofenceForegroundServicePlatform
       {required BackgroundTriggerHandler backgroundTriggerHandler}) {
     throw UnimplementedError();
   }
+
+  @override
+  Future<bool> subscribeToLocationUpdates() {
+    // TODO: implement subscribeToLocationUpdates
+    throw UnimplementedError();
+  }
 }
 
 void main() {

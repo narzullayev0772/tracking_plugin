@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-
 import 'package:geofence_foreground_service/constants/geofence_event_type.dart';
 import 'package:geofence_foreground_service/exports.dart';
 import 'package:geofence_foreground_service/geofence_foreground_service.dart';
@@ -15,6 +14,7 @@ void callbackDispatcher() async {
   GeofenceForegroundService().handleTrigger(
     backgroundTriggerHandler: (zoneID, triggerType) {
       log(zoneID, name: 'zoneID');
+      log(DateTime.now().toString(), name: 'triggerTime');
 
       if (triggerType == GeofenceEventType.enter) {
         log('enter', name: 'triggerType');
@@ -45,14 +45,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  static final LatLng _londonCityCenter = LatLng.degree(51.509865, -0.118092);
-
-  static final List<LatLng> _timesSquarePolygon = [
-    LatLng.degree(40.758078, -73.985640),
-    LatLng.degree(40.757983, -73.985417),
-    LatLng.degree(40.757881, -73.985493),
-    LatLng.degree(40.757956, -73.985688),
-  ];
+  static final LatLng _londonCityCenter = LatLng.degree(40.127543, 65.351606);
 
   bool _hasServiceStarted = false;
 
@@ -68,11 +61,9 @@ class _MyAppState extends State<MyApp> {
     await Permission.locationAlways.request();
     await Permission.notification.request();
 
-    _hasServiceStarted =
-        await GeofenceForegroundService().startGeofencingService(
+    _hasServiceStarted = await GeofenceForegroundService().startGeofencingService(
       contentTitle: 'Test app is running in the background',
-      contentText:
-          'Test app will be running to ensure seamless integration with ops team',
+      contentText: 'Test app will be running to ensure seamless integration with ops team',
       notificationChannelId: 'com.app.geofencing_notifications_channel',
       serviceId: 525600,
       isInDebugMode: true,
@@ -83,7 +74,6 @@ class _MyAppState extends State<MyApp> {
       ),
       callbackDispatcher: callbackDispatcher,
     );
-
     log(_hasServiceStarted.toString(), name: 'hasServiceStarted');
   }
 
@@ -96,7 +86,7 @@ class _MyAppState extends State<MyApp> {
     await GeofenceForegroundService().addGeofenceZone(
       zone: Zone(
         id: 'zone#1_id',
-        radius: 1000, // measured in meters
+        radius: 100, // measured in meters
         coordinates: [_londonCityCenter],
         notificationResponsivenessMs: 15 * 1000, // 15 seconds
       ),
@@ -109,13 +99,7 @@ class _MyAppState extends State<MyApp> {
       return;
     }
 
-    await GeofenceForegroundService().addGeofenceZone(
-      zone: Zone(
-        id: 'zone#2_id',
-        radius: 10000, // measured in meters
-        coordinates: _timesSquarePolygon,
-      ),
-    );
+    await GeofenceForegroundService().subscribeToLocationUpdates();
   }
 
   @override
@@ -129,9 +113,7 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                  onPressed: _createLondonGeofence,
-                  child: const Text('Create Circular London Geofence')),
+              ElevatedButton(onPressed: _createLondonGeofence, child: const Text('Create Circular London Geofence')),
               const SizedBox(height: 30),
               ElevatedButton(
                   onPressed: _createTimesSquarePolygonGeofence,

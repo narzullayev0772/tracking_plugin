@@ -12,7 +12,7 @@ public class GeofenceForegroundServicePlugin: NSObject, FlutterPlugin {
         flutterPluginRegistrantCallback = callback
     }
 
-    private var locationManager = CLLocationManager()
+    private var locationManager: CLLocationManager = CLLocationManager()
     private var result: FlutterResult?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -23,7 +23,7 @@ public class GeofenceForegroundServicePlugin: NSObject, FlutterPlugin {
         instance.locationManager.requestAlwaysAuthorization()
 
         instance.locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        instance.locationManager.distanceFilter = 1.0
+        instance.locationManager.distanceFilter = 100.0
 
         let channel = FlutterMethodChannel(
             name: "\(GeofenceForegroundServicePlugin.identifier)/foreground_geofence_foreground_service",
@@ -128,6 +128,8 @@ extension GeofenceForegroundServicePlugin: CLLocationManagerDelegate {
 
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         // Handle location updates here
+        let str = "l:\(locations[0].coordinate.latitude),\(locations[0].coordinate.longitude)"
+        eventHandler(zoneID: str, triggerType: 3)
     }
 
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
