@@ -63,19 +63,12 @@ class GeofenceForegroundService : Service() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
-                saveLocation(
+                SharedPreferenceHelper.addLocation(
+                    this@GeofenceForegroundService,
                     "${locationResult.lastLocation?.latitude}, ${locationResult.lastLocation?.longitude}"
                 )
             }
         }
-    }
-
-    private fun saveLocation(location: String) {
-        // save location to local storage
-        SharedPreferenceHelper.addLocation(
-            this,
-            location
-        )
     }
 
     override fun onBind(p0: Intent?): IBinder? {
