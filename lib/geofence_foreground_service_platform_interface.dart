@@ -72,8 +72,7 @@ abstract class GeofenceForegroundServicePlatform extends PlatformInterface {
     throw UnimplementedError('removeAllGeoFences() has not been implemented.');
   }
 
-  // subscribe to location updates
-  Future<void> subscribeToLocationUpdates() {
-    throw UnimplementedError('subscribeToLocationUpdates() has not been implemented.');
+  Future<List<String>> getTrackedLocations() {
+    throw UnimplementedError('getTrackedLocations() has not been implemented.');
   }
 }

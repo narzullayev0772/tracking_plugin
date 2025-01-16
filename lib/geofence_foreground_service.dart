@@ -100,10 +100,10 @@ class GeofenceForegroundService {
     return GeofenceForegroundServicePlatform.instance.removeAllGeoFences();
   }
 
-  /// Subscribes to location updates
-  /// This method is used to subscribe to location updates.
-  /// Returns: A Future<bool> that resolves to true if the subscription was successful; otherwise, false.
-  Future<void> subscribeToLocationUpdates() async {
-    GeofenceForegroundServicePlatform.instance.subscribeToLocationUpdates();
+  /// Get Tracked Locations when entering or exiting a geofence
+  ///
+  /// Returns: A Future<List<String>> that resolves to a list of tracked locations.
+  Future<List<String>> getTrackedLocations() {
+    return GeofenceForegroundServicePlatform.instance.getTrackedLocations();
   }
 }

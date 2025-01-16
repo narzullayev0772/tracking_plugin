@@ -109,8 +109,6 @@ class _MyAppState extends State<MyApp> {
       log('Service has not started yet', name: 'createGeofence');
       return;
     }
-
-    await GeofenceForegroundService().subscribeToLocationUpdates();
   }
 
   @override

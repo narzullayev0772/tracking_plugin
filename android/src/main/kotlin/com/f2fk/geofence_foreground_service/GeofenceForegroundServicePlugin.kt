@@ -190,6 +190,11 @@ class GeofenceForegroundServicePlugin : FlutterPlugin, MethodCallHandler, Activi
                 removeGeofence(listOf(zonesId), result)
             }
 
+            "getTrackedLocations" -> {
+                val locations = SharedPreferenceHelper.getLocations(context)
+                result.success(locations.toList())
+            }
+
             else -> {
                 result.notImplemented()
             }
@@ -224,9 +229,12 @@ class GeofenceForegroundServicePlugin : FlutterPlugin, MethodCallHandler, Activi
             )
             .setExpirationDuration(Geofence.NEVER_EXPIRE)
             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
-    
+
         if (zone.notificationResponsivenessMs != null) {
-            Log.v("addGeofence", "Setting notification responsiveness to ${zone.notificationResponsivenessMs}")
+            Log.v(
+                "addGeofence",
+                "Setting notification responsiveness to ${zone.notificationResponsivenessMs}"
+            )
             geofenceBuilder.setNotificationResponsiveness(zone.notificationResponsivenessMs)
         }
 

@@ -16,6 +16,7 @@ import com.f2fk.geofence_foreground_service.BackgroundWorker.Companion.IS_IN_DEB
 import com.f2fk.geofence_foreground_service.BackgroundWorker.Companion.PAYLOAD_KEY
 import com.f2fk.geofence_foreground_service.BackgroundWorker.Companion.ZONE_ID
 import com.f2fk.geofence_foreground_service.enums.GeofenceServiceAction
+import com.f2fk.geofence_foreground_service.utils.SharedPreferenceHelper
 import com.f2fk.geofence_foreground_service.utils.extraNameGen
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.GeofencingEvent
@@ -62,29 +63,19 @@ class GeofenceForegroundService : Service() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
-                val oneOffTaskRequest =
-                    OneTimeWorkRequest.Builder(BackgroundWorker::class.java)
-                        .setInputData(
-                            buildTaskInputData(
-                                "l:${locationResult.lastLocation?.latitude}, ${locationResult.lastLocation?.longitude}",
-                                false,
-                                "3"
-                            )
-                        )
-                        .build()
-
-                applicationContext!!.workManager().enqueueUniqueWork(
-                    Constants.bgTaskUniqueNameLocation,
-                    ExistingWorkPolicy.APPEND_OR_REPLACE,
-                    oneOffTaskRequest
-                )
-
-                Log.d(
-                    "onLocationResult",
+                saveLocation(
                     "${locationResult.lastLocation?.latitude}, ${locationResult.lastLocation?.longitude}"
                 )
             }
         }
+    }
+
+    private fun saveLocation(location: String) {
+        // save location to local storage
+        SharedPreferenceHelper.addLocation(
+            this,
+            location
+        )
     }
 
     override fun onBind(p0: Intent?): IBinder? {
@@ -164,6 +155,8 @@ class GeofenceForegroundService : Service() {
                 val zoneID: String? = triggeringGeoFences?.first()?.requestId
 
                 if (zoneID != null) {
+                    val isEnter: Boolean = geofenceTransition == 1
+                    SharedPreferenceHelper.setEnter(this, isEnter, zoneID)
                     val oneOffTaskRequest =
                         OneTimeWorkRequest.Builder(BackgroundWorker::class.java)
                             .setInputData(

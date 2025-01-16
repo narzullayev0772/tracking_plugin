@@ -55,9 +55,11 @@ class MockGeofenceForegroundServicePlatform
     throw UnimplementedError();
   }
 
+
+
   @override
-  Future<bool> subscribeToLocationUpdates() {
-    // TODO: implement subscribeToLocationUpdates
+  Future<List<String>> getTrackedLocations() {
+    // TODO: implement getTrackedLocations
     throw UnimplementedError();
   }
 }
