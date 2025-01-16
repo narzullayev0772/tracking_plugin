@@ -7,12 +7,21 @@ import 'package:geofence_foreground_service/exports.dart';
 import 'package:geofence_foreground_service/geofence_foreground_service.dart';
 import 'package:geofence_foreground_service/models/notification_icon_data.dart';
 import 'package:geofence_foreground_service/models/zone.dart';
+import 'package:geofence_foreground_service_example/storage_service.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+String portName = 'geofence_port_name';
 
 @pragma('vm:entry-point')
 void callbackDispatcher() async {
   GeofenceForegroundService().handleTrigger(
-    backgroundTriggerHandler: (zoneID, triggerType) {
+    backgroundTriggerHandler: (zoneID, triggerType) async {
+      // // send with isolate
+      // SendPort? port = IsolateNameServer.lookupPortByName(portName);
+      // if (port != null && triggerType == GeofenceEventType.dwell) {
+      //   port.send("$zoneID T:${DateTime.now().hour}:${DateTime.now().minute}:${DateTime.now().second}");
+      // }
+      await StorageService.add("$zoneID T:${DateTime.now().hour}:${DateTime.now().minute}:${DateTime.now().second}");
       log(zoneID, name: 'zoneID');
       log(DateTime.now().toString(), name: 'triggerTime');
 
@@ -33,7 +42,6 @@ void callbackDispatcher() async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   runApp(const MyApp());
 }
 
@@ -45,6 +53,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  List<String> locations = [];
   static final LatLng _londonCityCenter = LatLng.degree(40.127543, 65.351606);
 
   bool _hasServiceStarted = false;
@@ -57,6 +66,8 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
+    locations = await StorageService.getList();
+    setState(() {});
     await Permission.location.request();
     await Permission.locationAlways.request();
     await Permission.notification.request();
@@ -107,19 +118,30 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Plugin'),
+          actions: [
+            IconButton(
+                onPressed: () async {
+                  locations = await StorageService.getList();
+                  setState(() {});
+                },
+                icon: const Icon(Icons.electric_bolt)),
+            IconButton(onPressed: _createLondonGeofence, icon: const Icon(Icons.add)),
+            IconButton(onPressed: _createTimesSquarePolygonGeofence, icon: const Icon(Icons.add_box_outlined)),
+          ],
         ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(onPressed: _createLondonGeofence, child: const Text('Create Circular London Geofence')),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                  onPressed: _createTimesSquarePolygonGeofence,
-                  child: const Text('Create Polygon Times Square Geofence')),
-            ],
-          ),
+        body: ListView.separated(
+          padding: const EdgeInsets.all(8),
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Text(locations[index]),
+              minVerticalPadding: 0,
+              contentPadding: EdgeInsets.zero,
+              minTileHeight: 20,
+            );
+          },
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
+          itemCount: locations.length,
         ),
       ),
     );
