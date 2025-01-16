@@ -148,8 +148,6 @@ class GeofenceForegroundService : Service() {
                 val zoneID: String? = triggeringGeoFences?.first()?.requestId
 
                 if (zoneID != null) {
-                    val isEnter: Boolean = geofenceTransition == 1
-                    SharedPreferenceHelper.setEnter(this, isEnter, zoneID)
                     val oneOffTaskRequest =
                         OneTimeWorkRequest.Builder(BackgroundWorker::class.java)
                             .setInputData(
@@ -166,6 +164,8 @@ class GeofenceForegroundService : Service() {
                         ExistingWorkPolicy.APPEND_OR_REPLACE,
                         oneOffTaskRequest
                     )
+                    val isEnter: Boolean = geofenceTransition == 1
+                    SharedPreferenceHelper.setEnter(this, isEnter, zoneID)
                 }
             }
         } catch (e: Exception) {

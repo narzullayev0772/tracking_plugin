@@ -32,8 +32,8 @@ object SharedPreferenceHelper {
             .apply()
     }
 
-    fun getLocations(ctx: Context): List<String> {
-        return ctx.prefs().getStringSet(LOCATION_KEY, setOf())?.toList() ?: listOf()
+    fun getLocations(ctx: Context): Set<String> {
+        return ctx.prefs().getStringSet(LOCATION_KEY, setOf()) ?: setOf()
     }
 
     fun addLocation(ctx: Context, location: String) {

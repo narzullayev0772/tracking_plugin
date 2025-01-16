@@ -31,7 +31,6 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 
 @Suppress("DEPRECATION") // Deprecated for third party Services.
@@ -74,7 +73,7 @@ class GeofenceForegroundServicePlugin : FlutterPlugin, MethodCallHandler, Activi
         context = flutterPluginBinding.applicationContext
     }
 
-    override fun onMethodCall(call: MethodCall, result: Result) {
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "startGeofencingService" -> {
                 try {
@@ -192,7 +191,7 @@ class GeofenceForegroundServicePlugin : FlutterPlugin, MethodCallHandler, Activi
 
             "getTrackedLocations" -> {
                 val locations = SharedPreferenceHelper.getLocations(context)
-                result.success(locations)
+                result.success(locations.toList())
             }
 
             else -> {
@@ -201,7 +200,7 @@ class GeofenceForegroundServicePlugin : FlutterPlugin, MethodCallHandler, Activi
         }
     }
 
-    private fun addGeofence(zone: Zone, result: Result) {
+    private fun addGeofence(zone: Zone, result: MethodChannel.Result) {
         if (!SharedPreferenceHelper.hasCallbackHandle(context)) {
             result.error(
                 "1",
@@ -308,8 +307,8 @@ class GeofenceForegroundServicePlugin : FlutterPlugin, MethodCallHandler, Activi
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
+            //   public void onRequestPermissionsMethodChannel.Result(int requestCode, String[] permissions,
+            //                                          int[] grantMethodChannel.Results)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
 //            return
@@ -329,13 +328,13 @@ class GeofenceForegroundServicePlugin : FlutterPlugin, MethodCallHandler, Activi
             }
     }
 
-    private fun addGeoFences(zones: ZonesList, result: Result) {
+    private fun addGeoFences(zones: ZonesList, result: MethodChannel.Result) {
         (zones.zones ?: emptyList()).forEach {
             addGeofence(it, result)
         }
     }
 
-    private fun removeGeofence(geofenceRequestIds: List<String>, result: Result) {
+    private fun removeGeofence(geofenceRequestIds: List<String>, result: MethodChannel.Result) {
         val geofencingClient = LocationServices.getGeofencingClient(context)
 
         geofencingClient.removeGeofences(geofenceRequestIds).addOnSuccessListener {
