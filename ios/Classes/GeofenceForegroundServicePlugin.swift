@@ -81,6 +81,9 @@ public class GeofenceForegroundServicePlugin: NSObject, FlutterPlugin {
 //            addGeoFences(zonesList, result)
         case "removeGeofence":
             result("iOS " + UIDevice.current.systemVersion)
+        case "getTrackedLocations":
+            let list = UserDefaults.standard.stringArray(forKey: "location") ?? [String]()
+            result(list)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -128,8 +131,24 @@ extension GeofenceForegroundServicePlugin: CLLocationManagerDelegate {
 
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         // Handle location updates here
-        let str = "l:\(locations[0].coordinate.latitude),\(locations[0].coordinate.longitude)"
-        eventHandler(zoneID: str, triggerType: 3)
+        let str = "\(locations[0].coordinate.latitude), \(locations[0].coordinate.longitude)"
+        saveToLocal(location:str)
+    }
+
+    public func saveToLocal(location: String) {
+        var activeZone = UserDefaults.standard.string(forKey: "activeZone")
+        if activeZone == nil {
+                return
+            }
+        var isEntered = UserDefaults.standard.bool(forKey: "isEntered")
+        if isEntered {
+            // get old list
+            var list = UserDefaults.standard.stringArray(forKey: "location") ?? [String]()
+            // add new location
+            list.append("\(location), \(activeZone!)")
+            // save new list
+            UserDefaults.standard.set(list, forKey: "location")
+        }
     }
 
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -139,13 +158,20 @@ extension GeofenceForegroundServicePlugin: CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
         print("Entered geofence: \(region.identifier)")
         // Perform actions when entering the geofence
+        saveGeoFence(zone: region.identifier, isEntered: true)
         eventHandler(zoneID: region.identifier, triggerType: 1)
     }
 
     public func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
         print("Exited geofence: \(region.identifier)")
         // Perform actions when exiting the geofence
+        saveGeoFence(zone: region.identifier, isEntered: false)
         eventHandler(zoneID: region.identifier, triggerType: 2)
+    }
+
+    public func saveGeoFence(zone: String, isEntered: Bool) {
+        UserDefaults.standard.set(zone, forKey: "activeZone")
+        UserDefaults.standard.set(isEntered, forKey: "isEntered")
     }
 
     public func eventHandler(zoneID: String, triggerType: Int) {
