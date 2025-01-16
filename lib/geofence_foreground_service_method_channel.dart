@@ -197,6 +197,15 @@ class MethodChannelGeofenceForegroundService extends GeofenceForegroundServicePl
   /// This method is used to get all tracked locations
   @override
   Future<List<String>> getTrackedLocations() async {
-    return await foregroundChannel.invokeMethod<List<String>>('getTrackedLocations') ?? [];
+    List<String> result = [];
+    try {
+      result = await foregroundChannel.invokeMethod<List<String>>('getTrackedLocations') ?? [];
+    } catch (e) {
+      log(
+        e.toString(),
+        name: 'removeAllGeoFences_failure',
+      );
+    }
+    return result;
   }
 }
