@@ -192,7 +192,7 @@ class GeofenceForegroundServicePlugin : FlutterPlugin, MethodCallHandler, Activi
 
             "getTrackedLocations" -> {
                 val locations = SharedPreferenceHelper.getLocations(context)
-                result.success(locations.toList())
+                result.success(locations)
             }
 
             else -> {

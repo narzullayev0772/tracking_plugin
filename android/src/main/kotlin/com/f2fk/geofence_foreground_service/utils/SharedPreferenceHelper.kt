@@ -25,15 +25,15 @@ object SharedPreferenceHelper {
 
     fun hasCallbackHandle(ctx: Context) = ctx.prefs().contains(CALLBACK_DISPATCHER_HANDLE_KEY)
 
-    fun saveLocations(ctx: Context, locations: List<String>) {
+    private fun saveLocations(ctx: Context, locations: List<String>) {
         ctx.prefs()
             .edit()
             .putStringSet(LOCATION_KEY, locations.toSet())
             .apply()
     }
 
-    fun getLocations(ctx: Context): Set<String> {
-        return ctx.prefs().getStringSet(LOCATION_KEY, setOf()) ?: setOf()
+    fun getLocations(ctx: Context): List<String> {
+        return ctx.prefs().getStringSet(LOCATION_KEY, setOf())?.toList() ?: listOf()
     }
 
     fun addLocation(ctx: Context, location: String) {
