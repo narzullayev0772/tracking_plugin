@@ -199,11 +199,13 @@ class MethodChannelGeofenceForegroundService extends GeofenceForegroundServicePl
   Future<List<String>> getTrackedLocations() async {
     List<String> result = [];
     try {
-      result = await foregroundChannel.invokeMethod<List<String>>('getTrackedLocations') ?? [];
+      final r = await foregroundChannel.invokeMethod('getTrackedLocations') ?? [];
+      print(r is List?(r.firstOrNull):r);
+      print(r.runtimeType);
     } catch (e) {
       log(
         e.toString(),
-        name: 'removeAllGeoFences_failure',
+        name: 'getTrackedLocations_failure',
       );
     }
     return result;
